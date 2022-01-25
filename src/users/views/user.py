@@ -5,14 +5,16 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from rest_condition import Or
 from rest_framework import filters, viewsets
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from base.documentation import jwt_header
 from base.permissions import IsEmployee
 from users.models import Employee, Device
-from users.serializers import EmployeeDetailsSerializer, EmployeeSerializer, DeviceSerializer
+from users.serializers import EmployeeDetailsSerializer, EmployeeSerializer, DeviceSerializer, DeviceListSerializer
 
 logger = logging.getLogger('user_app')
 
@@ -24,7 +26,7 @@ class DeviceViewSet(viewsets.ModelViewSet):
     """
     Creating Device
     """
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
@@ -42,24 +44,24 @@ class DeviceViewSet(viewsets.ModelViewSet):
     # def get_permissions(self):
     #     return [permission() for permission in permission_classes]
 
-    # def get_serializer_class(self):
-    #     if self.action in ['list', 'retrieve']:
-    #         return EmployeeDetailsSerializer
-    #     return EmployeeSerializer
+    def get_serializer_class(self):
+        if self.action in ['list']:
+            return DeviceListSerializer
+        return DeviceSerializer
 
 
-@method_decorator(name='get', decorator=swagger_auto_schema())
 class DeviceList(APIView):
     """
     An API endpoint for Getting device list
     """
+    permission_classes = [AllowAny]
 
     def get(self, request, user_id):
         queryset = Device.objects.filter(user_id=user_id).select_related('user')
         serializer_context = {
             'request': request
         }
-        serializer = DeviceSerializer(queryset, context=serializer_context, many=True)
+        serializer = DeviceListSerializer(queryset, context=serializer_context, many=True)
         data = serializer.data
         if data:
             return Response(data)
