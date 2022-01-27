@@ -23,15 +23,15 @@ from rest_framework import permissions
 
 from user_app.views import HealthCheckAPI
 
-admin.site.site_header = 'Voting App Admin'  # default: "Django Administration"
-admin.site.index_title = 'Voting App Administration'  # default: "Site administration"
-admin.site.site_title = 'Voting App Admin'  # default: "Django site admin"
+admin.site.site_header = 'User Service API V1 Admin'  # default: "Django Administration"
+admin.site.index_title = 'User Service API V1 Administration'  # default: "Site administration"
+admin.site.site_title = 'User Service API V1 Admin'  # default: "Django site admin"
 
 schema_view = get_schema_view(
    openapi.Info(
       title="Voting API",
       default_version='v1',
-      description="API DOC of Voting App",
+      description="API DOC of User Service API V1",
       terms_of_service="https://www.google.com/policies/terms/",
       contact=openapi.Contact(email="contact@snippets.local"),
       license=openapi.License(name="BSD License"),

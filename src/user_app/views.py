@@ -10,7 +10,7 @@ class HealthCheckAPI(APIView):
 
     def get(self, request: Request) -> Response:
         data = {
-            'message': 'Voting App Case Study V1.',
+            'message': 'User Service API V1.',
             'method': str(self.request.method).lower(),
         }
         return Response(data={'data': data}, status=status.HTTP_200_OK)

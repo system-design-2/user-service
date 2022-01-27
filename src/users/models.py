@@ -31,23 +31,3 @@ class Device(BaseModel):
 
     def __str__(self):
         return "{} {}".format(self.user, self.device_name)
-
-
-class Employee(BaseModel):
-    employee_id = models.CharField(max_length=255, unique=True)
-    user = models.OneToOneField(User, on_delete=models.RESTRICT, related_name='employee')
-
-    class Meta:
-        db_table = 'employee'
-        verbose_name_plural = 'Employees'
-        verbose_name = 'Employee'
-        # ordering = ['-id']
-
-    def __str__(self):
-        return "{} {}".format(self.employee_id, self.user)
-
-
-@receiver(post_save, sender=Employee)
-def assign_default_group_employee(sender, instance: Employee, created, **kwargs):
-    if created:
-        instance.user.groups.add(Group.objects.get(name=settings.EMPLOYEE))

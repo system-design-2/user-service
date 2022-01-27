@@ -6,8 +6,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from users.factories import EmployeeFactory, UserFactory
-from users.models import Employee
+from users.factories import UserFactory, DeviceFactory
+from users.models import Device
 
 
 # Create your tests here.
@@ -16,13 +16,8 @@ class UserBaseTestCase(APITestCase):
         self.register_url = reverse("users:auth-register")
         self.login_url = reverse("users:auth-login")
         self.logout_url = reverse("users:auth-logout")
-        self.employee_url = reverse("users:employee-list")
-        self.restaurant_url = reverse("restaurant:restaurant-list")
-        self.menu_url = reverse("restaurant:restaurant-menu-list")
 
-        self.vote_url = reverse("vote:vote-list")
-        self.vote_result_url = reverse("vote:voting-result-today")
-        self.vote_result_publish_url = reverse("vote:voting-result-publish")
+        self.device_url = reverse("users:device")
 
         # Create Employee and Manager Group
         self.employee_group = Group.objects.create(name=settings.EMPLOYEE)
@@ -31,14 +26,14 @@ class UserBaseTestCase(APITestCase):
 
         # create a super user
         self.admin = UserFactory(username="admin", is_superuser=True, is_staff=True)
-        self.employee_one = EmployeeFactory(employee_id="employee_1")
-        self.employee_two = EmployeeFactory(employee_id="employee_2")
+        self.user1 = UserFactory(username="user1")
+        self.user2 = UserFactory(username="user2")
 
         self.admin_access_token = self.get_jwt_token({"username": self.admin.username, "password": self.password})
-        self.employee1_access_token = self.get_jwt_token(
-            {"username": self.employee_one.user.username, "password": self.password})
+        self.user1_access_token = self.get_jwt_token(
+            {"username": self.user.user1.username, "password": self.password})
         self.employee2_access_token = self.get_jwt_token(
-            {"username": self.employee_two.user.username, "password": self.password})
+            {"username": self.user.user2.username, "password": self.password})
 
         self.user = UserFactory(username="mahfuz11")
 
@@ -101,23 +96,23 @@ class UserAuthenticationTestCase(UserBaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_205_RESET_CONTENT)
 
 
-class EmployeeTestCase(UserBaseTestCase):
-    def test_employee_creation(self):
+class DeviceTestCase(UserBaseTestCase):
+    def test_device_creation(self):
         """
         Ensure we can create a employee with user.
         """
         data = {
-            "employee_id": "employee10",
-            "user": {
-                "username": "employee10",
-                "password": self.password,
-                "password2": self.password,
-                "email": "employee10@gmail.com",
-                "first_name": "Employee",
-                "last_name": "10"
-            }
+            "device_name": "One Plus 9 Pro",
+            "device_model": "One Plus 9 Pro",
+            "device_make": "One Plus",
+            "device_token": "asjasfhadhjfvafvjasvg4585",
+            "fcm_token": "asjasfhadhjfvafvjasvg4585HJGJHFF",
+            "status": True,
+            "is_fingerprint_enabled": True,
+            "is_passcode_enabled": True,
+            "user": self.user1
         }
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer  ' + self.admin_access_token)
-        response = self.client.post(self.employee_url, data, format='json')
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer  ' + self.user1_access_token)
+        response = self.client.post(self.device_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Employee.objects.get(employee_id="employee10").employee_id, "employee10")
+        self.assertEqual(Device.objects.get(device_token=data["asjasfhadhjfvafvjasvg4585"]).device_token, data["asjasfhadhjfvafvjasvg4585"])

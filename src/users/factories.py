@@ -1,7 +1,7 @@
 import factory
 from django.contrib.auth.models import User
 
-from users.models import Employee
+from users.models import Device
 
 
 class UserFactory(factory.django.DjangoModelFactory):
@@ -13,9 +13,10 @@ class UserFactory(factory.django.DjangoModelFactory):
     email = factory.LazyAttribute(lambda o: '%s@example.org' % o.username)
 
 
-class EmployeeFactory(factory.django.DjangoModelFactory):
+class DeviceFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = Employee
+        model = Device
 
-    employee_id = factory.Sequence(lambda n: 'Employee Test%s' % n)
+    device_token = factory.Sequence(lambda n: 'fklfahoadsfbgwfwhifw54548%s' % n)
+    # fcm_token = factory.Sequence(lambda n: 'fcmhvasgasgdashjasasgsdagvdj%s' % n)
     user = factory.SubFactory(UserFactory)

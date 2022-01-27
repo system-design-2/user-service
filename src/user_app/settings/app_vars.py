@@ -14,8 +14,6 @@ APPEND_SLASH = False
 
 EMPLOYEE = "Employee"
 MANAGER = "Manager"
-CONSECUTIVE_WORKING_DAYS = int(os.environ.get('CONSECUTIVE_WORKING_DAYS', 3))
-VOTING_LAST_HOUR = int(os.environ.get('VOTING_LAST_HOUR', 14))
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
