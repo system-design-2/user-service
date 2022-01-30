@@ -17,7 +17,8 @@ class UserBaseTestCase(APITestCase):
         self.login_url = reverse("users:auth-login")
         self.logout_url = reverse("users:auth-logout")
 
-        self.device_url = reverse("users:device")
+        self.device_url = reverse("users:device-list")
+        # self.user_device_url = reverse("users:device-list-public-api")
 
         # Create Employee and Manager Group
         self.employee_group = Group.objects.create(name=settings.EMPLOYEE)
@@ -31,9 +32,9 @@ class UserBaseTestCase(APITestCase):
 
         self.admin_access_token = self.get_jwt_token({"username": self.admin.username, "password": self.password})
         self.user1_access_token = self.get_jwt_token(
-            {"username": self.user.user1.username, "password": self.password})
+            {"username": self.user1.username, "password": self.password})
         self.employee2_access_token = self.get_jwt_token(
-            {"username": self.user.user2.username, "password": self.password})
+            {"username": self.user2.username, "password": self.password})
 
         self.user = UserFactory(username="mahfuz11")
 
@@ -53,7 +54,7 @@ class UserAuthenticationTestCase(UserBaseTestCase):
         Ensure we can register a new user
         """
         data = {
-            'username': "user1",
+            'username': "user",
             'first_name': "User",
             'last_name': "One",
             'email': "user1@gmail.com",
@@ -62,7 +63,7 @@ class UserAuthenticationTestCase(UserBaseTestCase):
         }
         response = self.client.post(self.register_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(User.objects.all().last().username, "user1")
+        self.assertEqual(User.objects.all().last().username, "user")
 
     def test_user_registration_login(self):
         """
@@ -99,7 +100,7 @@ class UserAuthenticationTestCase(UserBaseTestCase):
 class DeviceTestCase(UserBaseTestCase):
     def test_device_creation(self):
         """
-        Ensure we can create a employee with user.
+        Ensure we can create a device for a user.
         """
         data = {
             "device_name": "One Plus 9 Pro",
@@ -110,9 +111,27 @@ class DeviceTestCase(UserBaseTestCase):
             "status": True,
             "is_fingerprint_enabled": True,
             "is_passcode_enabled": True,
-            "user": self.user1
+            "user": self.user1.id
         }
         self.client.credentials(HTTP_AUTHORIZATION='Bearer  ' + self.user1_access_token)
         response = self.client.post(self.device_url, data, format='json')
+        print(json.loads(response.content))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Device.objects.get(device_token=data["asjasfhadhjfvafvjasvg4585"]).device_token, data["asjasfhadhjfvafvjasvg4585"])
+        self.assertEqual(Device.objects.get(device_token=data["device_token"]).device_token, data["device_token"])
+
+    def test_device_list_using_user(self):
+        """
+        Ensure we can get given user all device list.
+        """
+        user = UserFactory(username="user_device")
+        # Create n Device for User
+        n = 5
+        for i in range(n):
+            DeviceFactory(user=user)
+
+        url = reverse("users:device-list-public-api", kwargs={"user_id": user.id})
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Device.objects.count(), n)
+
+    
